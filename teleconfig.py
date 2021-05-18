@@ -1,0 +1,3 @@
+api_id = 5568293
+api_hash = 'ba81841873e89778eef96514fe4816fd'
+TOKEN = '1777659335:AAFJpALCpZkx487x7_f_iGhOkzYtI0vLzl0'
