@@ -24,3 +24,15 @@ class CheckRoles(State):
 
     def set_state(self, state):
         pass
+
+
+class LastSpeech(State):
+    def __init__(self, state):
+        super(LastSpeech, self).__init__(state)
+
+    def handle(self):
+        pass
+
+    def set_state(self, state):
+        pass
+
