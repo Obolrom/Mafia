@@ -24,3 +24,15 @@ class CheckRoles(State):
 
     def set_state(self, state):
         pass
+
+
+class MafiaShooting(State):
+    def __init__(self, state):
+        super(MafiaShooting, self).__init__(state)
+
+    def handle(self):
+        pass
+
+    def set_state(self, state):
+        pass
+
