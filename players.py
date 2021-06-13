@@ -43,11 +43,3 @@ class Godfather(Mafia):
 
     def sheriffs_check(self, nickname):
         pass
-
-
-if __name__ == '__main__':
-    players = [Mafia(""), Godfather(""), Citizen(""), Citizen(""), Citizen(""), Mafia(""), Sheriff("")]
-    for player in players:
-        if player is Mafia:
-            player.kill_player("")
-
