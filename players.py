@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 
 
 class Player(ABC):
-    def __init__(self, nickname, number):
-        self.nickname = nickname
+    def __init__(self, number):
+        self.__nickname = "Player"
         self.number = number
         self.__alive = True
 
@@ -17,35 +17,38 @@ class Player(ABC):
     def talk_time(self):
         pass
 
+    @property
+    def nickname(self):
+        return f"{self.__nickname}{self.number}"
+
 
 class Citizen(Player):
-    def __init__(self, nickname, number):
-        super(Citizen, self).__init__(nickname, number)
+    def __init__(self, number):
+        super(Citizen, self).__init__(number)
 
     def talk_time(self):
         pass
 
 
-
 class Sheriff(Citizen):
-    def __init__(self, nickname, number):
-        super(Sheriff, self).__init__(nickname, number)
+    def __init__(self,  number):
+        super(Sheriff, self).__init__( number)
 
     def talk_time(self):
         pass
 
 
 class Mafia(Player):
-    def __init__(self, nickname, number):
-        super(Mafia, self).__init__(nickname, number)
+    def __init__(self, number):
+        super(Mafia, self).__init__( number)
 
     def talk_time(self):
         pass
 
 
 class Godfather(Mafia):
-    def __init__(self, nickname, number):
-        super(Godfather, self).__init__(nickname, number)
+    def __init__(self, number):
+        super(Godfather, self).__init__( number)
 
     def talk_time(self):
         pass

@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from init import *
 from typing import List
 
 from players import *
@@ -225,7 +225,7 @@ class PlayerSpeeches(State):
 
         for player in self.context.players:
             if player.is_alive():
-                print(f"\t{player.number} {player.nickname} speech")
+                print(f"\t{player.nickname} speech")
                 self.context.add_to_voting(int(input("Введите челика на голосование: ")))
         if len(self.context.on_voting) == 0:
             self.context.transition_to(Night(self.context))
@@ -234,13 +234,8 @@ class PlayerSpeeches(State):
 
 
 if __name__ == '__main__':
-    players = [Mafia("groza_pidor", 1),
-               Godfather("ebloid", 2),
-               Citizen("roma_huilo", 3),
-               Citizen("pidor", 4),
-               Citizen("debil", 5),
-               Mafia("alkash", 6),
-               Sheriff("degan", 7)]
+    game_init = GameInit()
+    players = game_init.randomize_roles(8)
 
     gameLoop = GameLoop(players)
     gameLoop.start()
