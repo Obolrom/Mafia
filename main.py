@@ -232,7 +232,7 @@ class MafiaWin(GameOver):
         super(MafiaWin, self).__init__(state, event)
 
     async def handle(self, event=None):
-        await game_over("Победила мафия!")
+        await event.respond("Mafia win!")
         print("Mafia win!")
 
 
@@ -241,7 +241,7 @@ class CitizenWin(GameOver):
         super(CitizenWin, self).__init__(state, event)
 
     async def handle(self, event=None):
-        await game_over("Мирные жители выиграли!")
+        await event.respond("Citizens win!")
         print("Citizens win!")
 
 
