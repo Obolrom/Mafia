@@ -7,11 +7,24 @@
 # =================================== FILE 1 =================================
 
 from __future__ import annotations
-from init import *
+
+import re
+import asyncio
+
+from telethon import TelegramClient, events
+from telethon.tl.custom.button import Button
+
+from telethon.events import (
+    NewMessage,
+    CallbackQuery
+)
+
+import teleconfig as config
+from abc import ABC, abstractmethod
 from typing import List
 
+from init import *
 from players import *
-from abc import ABC, abstractmethod
 
 
 class GameLoop:
@@ -191,10 +204,10 @@ class Voting(State):
         super(Voting, self).__init__(state, event)
 
     def __voting(self, num):
-        if not num:
+        if num == 0:
             return
         player = self.context.players[num - 1]
-        if self.context.is_player_on_voting(player.number):
+        if player.number == num:
             player.kill()
             self.context.transition_to(LastSpeechAfterVoting(self.context, self.event))
         else:
@@ -204,9 +217,8 @@ class Voting(State):
         print("Voting")
         await event.respond("Voting")
         text = "Введите номер для голосования: "
-        num = await get_number(text, event)
-        # num = int(input(text))
-        self.__voting(num)
+        num_for_kill = await get_number(text, event)
+        self.__voting(num_for_kill)
         self.context.transition_to(Night(self.context, self.event))
 
 
@@ -306,36 +318,9 @@ class PlayerSpeeches(State):
                 # Can be done by hand?
                 # self.context.add_to_voting(number)
                 pass
-        if len(self.context.on_voting) == 0:
-            self.context.transition_to(Night(self.context, event))
-        else:
-            self.context.transition_to(Voting(self.context, event))
 
+        self.context.transition_to(Voting(self.context, event))
 
-# ===================================== FILE NO. 2 ===========================
-
-# NOTES
-# -----
-# `payload=dummy` -- a dummy payload for dummy triggers. Does nothing else.
-# TODO: check the appearence of help-functions, leave only the required.
-
-
-import re
-import time
-import asyncio
-
-from telethon import TelegramClient, sync, events
-from telethon.tl.custom.button import Button
-
-from telethon.events import (
-    NewMessage,
-    CallbackQuery
-)
-
-import teleconfig as config
-
-# from automata import *
-# ^ is required *only* is is at a separate file. Otherwise mind commenting it.
 
 WAIT_SECONDS = 3  # normal: ex.: 60
 MIN_PEOPLE = 7
