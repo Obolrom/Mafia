@@ -19,7 +19,7 @@ class Player(ABC):
 
     @property
     def nickname(self):
-        return f"{self.__nickname}{self.number}"
+        return f"{self.__nickname} {self.number}"
 
 
 class Citizen(Player):
@@ -29,6 +29,9 @@ class Citizen(Player):
     def talk_time(self):
         pass
 
+    def __repr__(self):
+        return "Мирный житель"
+
 
 class Sheriff(Citizen):
     def __init__(self,  number):
@@ -37,13 +40,19 @@ class Sheriff(Citizen):
     def talk_time(self):
         pass
 
+    def __repr__(self):
+        return "Шериф"
+
 
 class Mafia(Player):
     def __init__(self, number):
-        super(Mafia, self).__init__( number)
+        super(Mafia, self).__init__(number)
 
     def talk_time(self):
         pass
+
+    def __repr__(self):
+        return "Мафия"
 
 
 class Godfather(Mafia):
@@ -52,3 +61,6 @@ class Godfather(Mafia):
 
     def talk_time(self):
         pass
+
+    def __repr__(self):
+        return "Дон"

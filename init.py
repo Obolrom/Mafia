@@ -3,11 +3,23 @@ from typing import List
 import random
 
 
+class GameError(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
+# # OR: with
+# class NotEnoughPlayers(GameError):
+#     pass
+
+# class OverfullGamers(GameError):  # or: OverfullError
+#     pass
+
+
 class GameInit:
     def randomize_roles(self, players_amount):
         unrandom_setup = []
         if players_amount < 7:
-            Exception("Недостаточно людей!")
+            raise GameError("Недостаточно людей!")
         elif players_amount == 7:
             unrandom_setup = list(self.__7_players())
         elif players_amount == 8:
@@ -21,7 +33,7 @@ class GameInit:
         elif players_amount == 12:
             unrandom_setup = list(self.__12_players())
         else:
-            Exception("Слишком много людей!")
+            raise GameError("Слишком много людей!")
         random.shuffle(unrandom_setup)
         number = 1
         for player in unrandom_setup:

@@ -1,7 +1,10 @@
+# Это устаревшая версия, итоговая находится в main.py.
+
 from __future__ import annotations
 from init import *
 from typing import List
 
+from main import get_voted_people, start_day
 from players import *
 from abc import ABC, abstractmethod
 
@@ -57,12 +60,14 @@ class GameLoop:
                 return True
         return False
 
-    def start(self):
+    async def start(self, event):
         print("the game started")
+        # await event.respond('Знакомство мафии. Выделенное время: 1 минута')
+        await wait(event)
         while not isinstance(self._state, GameOver):
-            self._state.handle()
+            await self._state.handle()
             self.on_voting.clear()
-        self._state.handle()
+        await self._state.handle()
 
 
 class State(ABC):
@@ -95,8 +100,9 @@ class LastSpeechAfterVoting(State):
     def __init__(self, state):
         super(LastSpeechAfterVoting, self).__init__(state)
 
-    def handle(self):
+    async def handle(self):
         print("LastSpeechAfterVoting")
+        await event.respond("Last speech after voting")
         if self.context.is_mafia_equals_citizen_amount():
             self.context.transition_to(MafiaWin(self.context))
         elif self.context.get_mafia_amount() == 0:
@@ -109,8 +115,10 @@ class LastSpeechAfterKill(State):
     def __init__(self, state):
         super(LastSpeechAfterKill, self).__init__(state)
 
-    def handle(self):
+    async def handle(self):
         print("LastSpeechAfterKill")
+        await event.respond("Last speech after kill")
+        await wait(event)
         if self.context.is_mafia_equals_citizen_amount():
             self.context.transition_to(MafiaWin(self.context))
         elif self.context.get_mafia_amount() == 0:
@@ -145,14 +153,20 @@ class Night(State):
         else:
             print(f"{player.nickname} is not Sheriff")
 
-    def handle(self):
+    async def handle(self):
         print("Night")
-        num_for_kill = int(input("Введите номер для убийства: "))
+        # num_for_kill = int(input("Введите номер для убийства: "))
+        text = "Введите номер для убийства: "
+        entry = await get_number(text, event)
         if self.context.is_sheriff_alive():
-            num = int(input("Введите номер для проверки шерифа: "))
+            text = "Введите номер для убийства: "
+            entry = await get_number(text, event)
+            # num = int(input("Введите номер для проверки шерифа: "))
             self.__sheriffs_check(num)
         if self.context.is_godfather_alive():
-            num = int(input("Введите номер для проверки дона: "))
+            text = "Введите номер для убийства: "
+            entry = await get_number(text, event)
+            # num = int(input("Введите номер для проверки дона: "))
             self.__godfather_check(num)
         self.__mafia_kill(num_for_kill)
         self.context.transition_to(LastSpeechAfterKill(self.context))
@@ -170,9 +184,11 @@ class Voting(State):
         else:
             self.context.transition_to(Night(self.context))
 
-    def handle(self):
+    async def handle(self):
         print("Voting")
-        num = int(input("Введите номер для голосования: "))
+        text = "Введите номер для голосования: "
+        await get_vote_number(event, text)
+        num = int(input(text))
         self.__voting(num)
         self.context.transition_to(Night(self.context))
 
@@ -203,7 +219,7 @@ class RolesDistribution(State):
         super(RolesDistribution, self).__init__(game)
 
     def handle(self) -> None:
-        print("RolesDistribution")
+        print("RolesDistribution");  # await event.
         self.context.transition_to(MafiaAcquaintance(self.context))
 
 
@@ -211,8 +227,9 @@ class MafiaAcquaintance(State):
     def __init__(self, state):
         super(MafiaAcquaintance, self).__init__(state)
 
-    def handle(self) -> None:
+    async def handle(self) -> None:
         print("Hello Mafia")
+        await event.respond("Приветствие мафии")  # TODO: place the bot, actually, here
         self.context.transition_to(CheckRoles(self.context))
 
 
@@ -220,13 +237,43 @@ class PlayerSpeeches(State):
     def __init__(self, state):
         super(PlayerSpeeches, self).__init__(state)
 
-    def handle(self):
+    async def handle(self):
+        await start_day(event)
         print("PlayerSpeeches")
 
-        for player in self.context.players:
+        async for player in self.context.players:
             if player.is_alive():
-                print(f"\t{player.nickname} speech")
-                self.context.add_to_voting(int(input("Введите челика на голосование: ")))
+                text = f"\t{player.nickname} speech"
+                nickname = player.nickname
+                data = b'speach_' + bytes(nickname, encoding='utf8')
+                button = construct_button("Начать минуту игрока {nickname}",
+                    data)
+                await event.edit_message(
+                    text=f"Нажми, чтобы начать минуту игрока {player.nickname}",
+                    buttons=button)
+
+                print(text)
+
+                @bot.on(CallbackQuery(data=data))
+                async def process_minute(event_):
+                    s = 60
+                    def text_(s):
+                        return (
+                            "Длится минута игрока {nickname}..."
+                            f"\n\nОсталось секунд: {s}"
+                            )
+                    button = construct_button(text_(s), 'dummy')
+                    # ^ with the dummy payload, not to propagate or trigger.
+                    while s:
+                        await event.edit_message(text=text_(s))
+                        time.sleep(1)
+                        s -= 1
+
+                    event.edit_message(text='Минута закончена', buttons=[button])
+                # event.respond(...)  # ?
+                # int(input("Введите челика на голосование: "))
+                number = await get_voted_people(event)
+                self.context.add_to_voting(number)
         if len(self.context.on_voting) == 0:
             self.context.transition_to(Night(self.context))
         else:
